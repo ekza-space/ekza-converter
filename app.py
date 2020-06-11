@@ -21,16 +21,15 @@ def converter():
 
         # convert file to gltf
         converter_path = '~/tools/FBX2glTF/FBX2glTF-darwin-x64'
-        filename = "sphere.fbx"
         shell_command = f'{converter_path} --binary \
-            --input ./static/cloud/fbx_files/{filename} \
-            --output ./static/cloud/gltf_files/sphere.glb'
+            --input ./static/cloud/fbx_files/{fbx_file_name} \
+            --output ./static/cloud/gltf_files/{fbx_file_name[:-4]}.glb'
         subprocess.run(args=shell_command, shell=True)
         print('file converted')
 
         # send result back
-        url = 'http://localhost:8080/converter'
-        files = {'fbx_file': open('static/cloud/gltf_files/sphere.glb', 'rb')}
+        url = 'http://127.0.0.1:8080/converter'
+        files = {'fbx_file': open(f'static/cloud/gltf_files/{fbx_file_name[:-4]}.glb', 'rb')}
         requests.post(url, files=files, data={'instructions' : 'for_database'})
 
         return f"<h1> file recived: {fbx_file_name} </h1>"
