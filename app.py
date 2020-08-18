@@ -1,6 +1,10 @@
 from flask import Flask, request
 from flask_uploads import UploadSet, configure_uploads, ALL
 
+from utils.config_parser import CONVERTER, POST_URL
+from settings import CACHE_DIR
+from os import path
+
 import requests
 import subprocess, shlex
 
@@ -8,7 +12,7 @@ app = Flask(__name__)
 
 # setting up uploader
 fbx_files = UploadSet('fbx', ALL)
-app.config['UPLOADED_FBX_DEST'] = 'static/cloud/fbx_files'
+app.config['UPLOADED_FBX_DEST'] = CACHE_DIR
 configure_uploads(app, fbx_files)
 
 @app.route('/converter', methods=['GET', 'POST'])
@@ -20,20 +24,18 @@ def converter():
         fbx_file_name = fbx_files.save(fbx_file)
 
         # convert file to gltf
-        converter_path = '~/tools/FBX2glTF/FBX2glTF-darwin-x64'
-        shell_command = f'{converter_path} --binary \
-            --input ./static/cloud/fbx_files/{fbx_file_name} \
-            --output ./static/cloud/gltf_files/{fbx_file_name[:-4]}.glb'
+        shell_command = f'{CONVERTER} --binary \
+            --input {path.join(CACHE_DIR, fbx_file_name)} \
+            --output {path.join(CACHE_DIR, fbx_file_name[:-4])}.glb'
         subprocess.run(args=shell_command, shell=True)
         print('file converted')
 
         # send result back
-        url = 'http://127.0.0.1:8080/converter'
-        files = {'fbx_file': open(f'static/cloud/gltf_files/{fbx_file_name[:-4]}.glb', 'rb')}
-        requests.post(url, files=files, data={'instructions' : 'for_database'})
+        files = {'fbx_file': open(f'{path.join(CACHE_DIR, fbx_file_name[:-4])}.glb', 'rb')}
+        requests.post(POST_URL, files=files, data={'instructions' : 'for_database'})
 
         return f"<h1> file recived: {fbx_file_name} </h1>"
-    return "<h1> page is working </h1>"
+    return "<h1> Service is active </h1>"
 
 if __name__ =='__main__':
     app.run(debug=True, port=8081)

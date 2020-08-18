@@ -1,0 +1,5 @@
+[PATH]
+CONVERTER = "converter_path"
+
+[API]
+POST_URL = "api_url"

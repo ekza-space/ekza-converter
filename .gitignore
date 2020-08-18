@@ -1,4 +1,10 @@
+.idea/
 .vscode/
 __pycache__/
 venv/
-static/cloud/
+
+cache/*fbm
+cache/*fbx
+cache/*glb
+
+config.ini
